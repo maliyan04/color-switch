@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#6C63FF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Color Switch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pangolin&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   COLOR SWITCH — Styles
+   ============================================================ */
+:root{
+  --primary:#6C63FF;
+  --bg:#F8F9FA;
+  --dark:#22223B;
+  --white:#FFFFFF;
+  --success:#2EC4B6;
+  --error:#E63946;
+  --accent:#FFB703;
+  --purple:#9D4EDD;
+  --muted:#8A8AA3;
+  --line:#EDEFF4;
+  --radius:18px;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html,body{
+  margin:0; padding:0;
+  height:100%;
+  width:100%;
+}
+
+body{
+  font-family:'Pangolin','Trebuchet MS','Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--dark);
+  overflow:hidden;
+  overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:manipulation;
+}
+
+#app{
+  position:relative;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+/* ---------- Screens ---------- */
+.screen{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  padding:calc(10px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+}
+.screen.active{ display:flex; animation:screenIn .2s ease both; }
+.screen.scroll{ overflow-y:auto; -webkit-overflow-scrolling:touch; }
+
+@keyframes screenIn{ from{opacity:0} to{opacity:1} }
+
+.center-col{
+  width:100%;
+  max-width:520px;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:8px 0;
+}
+
+/* ---------- Splash ---------- */
+#screen-splash{
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:linear-gradient(140deg,#6C63FF 0%,#9D4EDD 55%,#FFB703 140%);
+  color:#fff;
+}
+.splash-inner{ display:flex; flex-direction:column; align-items:center; gap:16px; }
+.splash-badge{
+  font-size:clamp(34px,10vw,56px);
+  line-height:1;
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,.25));
+  animation:splashPop .6s ease both;
+}
+.splash-text{
+  font-size:clamp(22px,6.4vw,40px);
+  letter-spacing:.5px;
+  text-shadow:0 3px 12px rgba(0,0,0,.22);
+  animation:splashPop .6s .08s ease both;
+}
+.splash-dots{ display:flex; gap:8px; }
+.splash-dots span{
+  width:9px;height:9px;border-radius:50%;
+  background:rgba(255,255,255,.85);
+  animation:dotPulse 1s infinite ease-in-out;
+}
+.splash-dots span:nth-child(2){ animation-delay:.15s; }
+.splash-dots span:nth-child(3){ animation-delay:.3s; }
+
+@keyframes splashPop{ from{opacity:0;transform:translateY(14px) scale(.94)} to{opacity:1;transform:none} }
+@keyframes dotPulse{ 0%,100%{opacity:.35;transform:scale(.8)} 50%{opacity:1;transform:scale(1.15)} }
+
+/* ---------- Menu ---------- */
+#screen-menu{
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,183,3,.30), transparent 42%),
+    radial-gradient(circle at 88% 88%, rgba(46,196,182,.28), transparent 42%),
+    radial-gradient(circle at 82% 8%, rgba(157,78,221,.22), transparent 38%),
+    var(--bg);
+}
+.menu-col{
+  width:100%;
+  max-width:380px;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  text-align:center;
+  padding:12px 0;
+}
+.game-title{
+  margin:0;
+  font-size:clamp(32px,10vw,54px);
+  line-height:1.06;
+  color:var(--primary);
+  text-shadow:2px 3px 0 rgba(108,99,255,.16);
+  letter-spacing:1px;
+}
+.game-sub{
+  margin:0 0 10px;
+  font-size:clamp(12px,3.4vw,15px);
+  color:var(--muted);
+  letter-spacing:2px;
+}
+.menu-col .btn{ margin:0; }
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:100%;
+  min-height:54px;
+  padding:12px 22px;
+  border:none;
+  border-radius:16px;
+  font-family:inherit;
+  font-size:clamp(16px,4.3vw,19px);
+  line-height:1.1;
+  color:#fff;
+  background:var(--primary);
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  box-shadow:0 4px 0 rgba(0,0,0,.13), 0 6px 16px rgba(34,34,59,.13);
+  transition:transform .12s ease, box-shadow .12s ease, background-color .15s ease, color .15s ease;
+}
+.btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.13); }
+@media (hover:hover){
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 6px 0 rgba(0,0,0,.13), 0 12px 22px rgba(34,34,59,.18); }
+  .btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.13); }
+}
+.btn:focus-visible,
+.choice:focus-visible,
+.switch:focus-visible,
+.seg-btn:focus-visible,
+input[type=range]:focus-visible{
+  outline:3px solid var(--dark);
+  outline-offset:3px;
+}
+
+.btn-accent{ background:var(--accent); color:var(--dark); }
+.btn-success{ background:var(--success); color:#fff; }
+.btn-purple{ background:var(--purple); color:#fff; }
+.btn-danger{ background:var(--error); color:#fff; }
+.btn-ghost{
+  background:#fff;
+  color:var(--dark);
+  box-shadow:0 4px 0 rgba(34,34,59,.10), 0 6px 16px rgba(34,34,59,.08);
+}
+.btn-small{
+  width:auto;
+  min-height:44px;
+  padding:8px 22px;
+  font-size:15px;
+  border-radius:13px;
+}
+
+/* ---------- HUD ---------- */
+#screen-game{ gap:7px; overflow:hidden; }
+
+.hud{ display:flex; gap:8px; }
+.hud-box{
+  flex:1 1 0;
+  min-width:0;
+  background:#fff;
+  border-radius:14px;
+  padding:6px 6px 7px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  box-shadow:0 2px 8px rgba(34,34,59,.08);
+}
+.hud-k{
+  font-size:clamp(9px,2.3vw,11px);
+  letter-spacing:1.2px;
+  color:var(--muted);
+  white-space:nowrap;
+}
+.hud-v{
+  font-size:clamp(16px,4.6vw,22px);
+  line-height:1.2;
+  color:var(--dark);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
+}
+
+.hud2{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:0 2px;
+}
+.lives{
+  font-size:clamp(15px,4.4vw,21px);
+  letter-spacing:2px;
+  line-height:1;
+  white-space:nowrap;
+}
+.life{ transition:opacity .2s ease, filter .2s ease; }
+.life.lost{ opacity:.2; filter:grayscale(1); }
+
+.combo{
+  font-size:clamp(12px,3.4vw,16px);
+  color:var(--primary);
+  background:#fff;
+  padding:5px 13px;
+  border-radius:999px;
+  box-shadow:0 2px 8px rgba(34,34,59,.08);
+  white-space:nowrap;
+}
+.combo.milestone{ animation:comboPop .5s ease; }
+@keyframes comboPop{
+  0%{ transform:scale(1); }
+  35%{ transform:scale(1.26); color:var(--accent); }
+  100%{ transform:scale(1); }
+}
+
+/* ---------- Timer ---------- */
+.timer-wrap{
+  height:10px;
+  background:#E6E8EE;
+  border-radius:999px;
+  overflow:hidden;
+  flex:0 0 auto;
+}
+.timer-bar{
+  height:100%;
+  width:100%;
+  background-color:var(--success);
+  border-radius:999px;
+}
+
+/* ---------- Target ---------- */
+.target-area{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(6px,1.6vh,14px);
+}
+.target-label{
+  font-size:clamp(10px,2.9vw,13px);
+  letter-spacing:2.4px;
+  color:var(--muted);
+}
+.target-swatch{
+  width:clamp(72px, min(26vw, 20vh), 140px);
+  height:clamp(72px, min(26vw, 20vh), 140px);
+  border-radius:26%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:clamp(30px, min(11vw, 8.4vh), 58px);
+  line-height:1;
+  box-shadow:0 10px 26px rgba(34,34,59,.18), inset 0 -7px 0 rgba(0,0,0,.09);
+  transition:background-color .16s ease, color .16s ease;
+}
+
+/* ---------- Choices ---------- */
+.choices{
+  display:flex;
+  flex-wrap:wrap;
+  align-content:center;
+  justify-content:center;
+  gap:clamp(8px,2.4vw,15px);
+  flex:0 0 auto;
+  padding:2px 0;
+}
+.choices.size-lg{ --cs:clamp(54px, min(19vw, 16vh), 124px); }
+.choices.size-md{ --cs:clamp(50px, min(17.5vw, 14.5vh), 112px); }
+.choices.size-sm{ --cs:clamp(46px, min(16vw, 13vh), 100px); }
+
+.choice{
+  width:var(--cs);
+  height:var(--cs);
+  padding:0;
+  border:none;
+  border-radius:22%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:inherit;
+  font-size:calc(var(--cs) * .42);
+  line-height:1;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  box-shadow:0 4px 0 rgba(0,0,0,.15), 0 6px 14px rgba(34,34,59,.13);
+  transition:transform .1s ease, box-shadow .12s ease;
+  will-change:transform;
+}
+.choice:active{ transform:scale(.94); }
+@media (hover:hover){
+  .choice:hover{ transform:translateY(-3px); }
+}
+
+.choice.correct{ animation:okPulse .32s ease; box-shadow:0 0 0 4px var(--success), 0 6px 14px rgba(34,34,59,.2); }
+.choice.wrong{ animation:badShake .32s ease; box-shadow:0 0 0 4px var(--error), 0 6px 14px rgba(34,34,59,.2); }
+.choice.reveal{ box-shadow:0 0 0 4px var(--success), 0 6px 14px rgba(34,34,59,.2); }
+
+@keyframes okPulse{ 0%{transform:scale(1)} 45%{transform:scale(1.1)} 100%{transform:scale(1)} }
+@keyframes badShake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+.game-footer{
+  flex:0 0 auto;
+  display:flex;
+  justify-content:center;
+  padding-top:2px;
+}
+
+/* ---------- Cards / Panels ---------- */
+.card{
+  background:#fff;
+  border-radius:var(--radius);
+  padding:14px 16px;
+  box-shadow:0 6px 20px rgba(34,34,59,.09);
+}
+.screen-title{
+  margin:0;
+  text-align:center;
+  font-size:clamp(24px,7vw,34px);
+  color:var(--primary);
+  letter-spacing:1px;
+}
+.card-title{
+  margin:0 0 10px;
+  font-size:clamp(17px,4.6vw,21px);
+  color:var(--dark);
+}
+.text{
+  margin:0 0 10px;
+  font-size:clamp(14px,3.9vw,16px);
+  line-height:1.55;
+  color:#4A4A63;
+}
+.text:last-of-type{ margin-bottom:6px; }
+.version{
+  margin:12px 0 0;
+  font-size:13px;
+  color:var(--muted);
+  letter-spacing:1px;
+  text-align:center;
+}
+
+/* ---------- Settings rows ---------- */
+.row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.row:last-child{ border-bottom:none; padding-bottom:2px; }
+.row:first-child{ padding-top:2px; }
+.row.col{ flex-direction:column; align-items:stretch; gap:8px; }
+.row-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.row-label{ font-size:clamp(15px,4vw,17px); }
+.row-value{ font-size:15px; color:var(--primary); }
+
+.switch{
+  min-width:78px;
+  min-height:44px;
+  padding:8px 16px;
+  border:none;
+  border-radius:999px;
+  font-family:inherit;
+  font-size:15px;
+  cursor:pointer;
+  background:#DDE1E7;
+  color:#5A5A72;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color .18s ease, color .18s ease, transform .1s ease;
+}
+.switch:active{ transform:scale(.96); }
+.switch[aria-checked="true"]{ background:var(--success); color:#fff; }
+
+input[type=range]{
+  -webkit-appearance:none;
+  appearance:none;
+  width:100%;
+  height:34px;
+  background:transparent;
+  cursor:pointer;
+  margin:0;
+}
+input[type=range]::-webkit-slider-runnable-track{ height:10px; border-radius:999px; background:#DDE1E7; }
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--primary);
+  margin-top:-8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+  border:3px solid #fff;
+}
+input[type=range]::-moz-range-track{ height:10px; border-radius:999px; background:#DDE1E7; }
+input[type=range]::-moz-range-thumb{
+  width:20px;height:20px;border:none;border-radius:50%;
+  background:var(--primary);
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+
+.seg{
+  display:flex;
+  background:#EDEFF4;
+  border-radius:13px;
+  padding:4px;
+  gap:4px;
+}
+.seg-btn{
+  border:none;
+  background:transparent;
+  font-family:inherit;
+  font-size:15px;
+  padding:9px 16px;
+  min-height:40px;
+  border-radius:10px;
+  cursor:pointer;
+  color:#5A5A72;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color .15s ease, color .15s ease;
+}
+.seg-btn.active{
+  background:var(--primary);
+  color:#fff;
+  box-shadow:0 2px 7px rgba(108,99,255,.35);
+}
+
+/* ---------- Game Over ---------- */
+#screen-gameover{
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(230,57,70,.16), transparent 45%),
+    radial-gradient(circle at 85% 90%, rgba(108,99,255,.18), transparent 45%),
+    var(--bg);
+}
+.go-title{
+  margin:0;
+  text-align:center;
+  font-size:clamp(26px,8vw,40px);
+  color:var(--error);
+  letter-spacing:1.5px;
+  text-shadow:2px 3px 0 rgba(230,57,70,.14);
+}
+.new-best{
+  text-align:center;
+  color:var(--accent);
+  font-size:clamp(13px,3.6vw,16px);
+  letter-spacing:2px;
+  animation:comboPop .8s ease;
+}
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.stat{
+  background:#F4F5F9;
+  border-radius:13px;
+  padding:9px 8px;
+  text-align:center;
+  min-width:0;
+}
+.stat:first-child{ grid-column:1 / -1; background:#EFEDFF; }
+.stat-k{
+  display:block;
+  font-size:clamp(9px,2.5vw,11px);
+  letter-spacing:1px;
+  color:var(--muted);
+  margin-bottom:2px;
+}
+.stat-v{
+  display:block;
+  font-size:clamp(16px,4.8vw,22px);
+  color:var(--dark);
+}
+.btn-stack{ display:flex; flex-direction:column; gap:10px; }
+
+/* ---------- Dialog ---------- */
+.backdrop{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(34,34,59,.55);
+}
+.backdrop.show{ display:flex; animation:screenIn .16s ease both; }
+.dialog{
+  width:100%;
+  max-width:340px;
+  background:#fff;
+  border-radius:20px;
+  padding:22px 20px 18px;
+  text-align:center;
+  box-shadow:0 22px 50px rgba(0,0,0,.3);
+}
+.dialog-title{
+  margin:0 0 8px;
+  font-size:clamp(18px,5vw,22px);
+  color:var(--dark);
+}
+.dialog-text{
+  margin:0 0 18px;
+  font-size:clamp(14px,3.9vw,16px);
+  line-height:1.5;
+  color:#4A4A63;
+}
+.dialog-actions{ display:flex; gap:10px; }
+.dialog-actions .btn{ min-height:48px; font-size:16px; }
+
+/* ---------- Small height tweaks ---------- */
+@media (max-height:480px){
+  .hud-box{ padding:4px 4px 5px; }
+  .hud-k{ font-size:9px; }
+  .hud-v{ font-size:15px; }
+  .target-label{ display:none; }
+  .timer-wrap{ height:8px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ SPLASH ============ -->
+  <section id="screen-splash" class="screen active" aria-label="Splash screen">
+    <div class="splash-inner">
+      <div class="splash-badge" aria-hidden="true">🎨</div>
+      <div class="splash-text">An Aliyan Production</div>
+      <div class="splash-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+  </section>
+
+  <!-- ============ MAIN MENU ============ -->
+  <section id="screen-menu" class="screen" aria-label="Main menu">
+    <div class="menu-col">
+      <h1 class="game-title">COLOR<br>SWITCH</h1>
+      <p class="game-sub">MATCH • COMBO • SCORE</p>
+      <button class="btn" id="btn-play" type="button">▶ PLAY</button>
+      <button class="btn btn-accent" id="btn-settings" type="button">⚙ SETTINGS</button>
+      <button class="btn btn-success" id="btn-about" type="button">ℹ ABOUT</button>
+      <button class="btn btn-purple" id="btn-developer" type="button">👤 DEVELOPER</button>
+    </div>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section id="screen-game" class="screen" aria-label="Gameplay">
+    <div class="hud">
+      <div class="hud-box"><span class="hud-k">SCORE</span><span class="hud-v" id="hud-score">0</span></div>
+      <div class="hud-box"><span class="hud-k">STAGE</span><span class="hud-v" id="hud-stage">1</span></div>
+      <div class="hud-box"><span class="hud-k">BEST</span><span class="hud-v" id="hud-best">0</span></div>
+    </div>
+
+    <div class="hud2">
+      <div class="lives" id="hud-lives" aria-label="Lives remaining"></div>
+      <div class="combo" id="hud-combo">COMBO ×1</div>
+    </div>
+
+    <div class="timer-wrap" aria-hidden="true"><div class="timer-bar" id="timer-bar"></div></div>
+
+    <div class="target-area">
+      <div class="target-label">MATCH THIS COLOR</div>
+      <div class="target-swatch" id="target-swatch" role="img" aria-label="Target color">
+        <span id="target-symbol">●</span>
+      </div>
+    </div>
+
+    <div class="choices size-lg" id="choices" role="group" aria-label="Color choices"></div>
+
+    <div class="game-footer">
+      <button class="btn btn-ghost btn-small" id="btn-quit" type="button">QUIT</button>
+    </div>
+  </section>
+
+  <!-- ============ GAME OVER ============ -->
+  <section id="screen-gameover" class="screen" aria-label="Game over">
+    <div class="center-col">
+      <h2 class="go-title">GAME OVER</h2>
+      <div class="new-best" id="go-new" style="display:none">★ NEW BEST ★</div>
+      <div class="card stats">
+        <div class="stat"><span class="stat-k">FINAL SCORE</span><span class="stat-v" id="go-score">0</span></div>
+        <div class="stat"><span class="stat-k">BEST SCORE</span><span class="stat-v" id="go-best">0</span></div>
+        <div class="stat"><span class="stat-k">HIGHEST COMBO</span><span class="stat-v" id="go-combo">×1</span></div>
+        <div class="stat"><span class="stat-k">ACCURACY</span><span class="stat-v" id="go-acc">0%</span></div>
+        <div class="stat"><span class="stat-k">STAGE</span><span class="stat-v" id="go-stage">1</span></div>
+      </div>
+      <div class="btn-stack">
+        <button class="btn" id="btn-again" type="button">PLAY AGAIN</button>
+        <button class="btn btn-ghost" id="btn-home" type="button">HOME</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section id="screen-settings" class="screen scroll" aria-label="Settings">
+    <div class="center-col">
+      <h2 class="screen-title">SETTINGS</h2>
+
+      <div class="card">
+        <div class="row">
+          <span class="row-label">Background Music</span>
+          <button class="switch" id="sw-music" type="button" role="switch" aria-checked="true">ON</button>
+        </div>
+
+        <div class="row col">
+          <div class="row-head">
+            <span class="row-label">Music Volume</span>
+            <span class="row-value" id="vol-val">30%</span>
+          </div>
+          <input type="range" id="vol-range" min="0" max="100" step="5" value="30" aria-label="Music volume">
+        </div>
+
+        <div class="row">
+          <span class="row-label">Sound Effects</span>
+          <button class="switch" id="sw-sfx" type="button" role="switch" aria-checked="true">ON</button>
+        </div>
+
+        <div class="row">
+          <span class="row-label">Haptic Feedback</span>
+          <button class="switch" id="sw-haptics" type="button" role="switch" aria-checked="true">ON</button>
+        </div>
+
+        <div class="row">
+          <span class="row-label">Difficulty</span>
+          <div class="seg" role="group" aria-label="Difficulty">
+            <button class="seg-btn active" id="diff-normal" type="button" data-diff="normal">Normal</button>
+            <button class="seg-btn" id="diff-hard" type="button" data-diff="hard">Hard</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-danger" id="btn-reset" type="button">RESET BEST SCORE</button>
+      <button class="btn btn-ghost" id="btn-settings-back" type="button">BACK</button>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="screen-about" class="screen scroll" aria-label="About">
+    <div class="center-col">
+      <h2 class="screen-title">ABOUT</h2>
+      <div class="card">
+        <h3 class="card-title">About Color Switch</h3>
+        <p class="text">Color Switch is a simple and fast-paced color matching game designed to test your reaction speed, accuracy, and focus.</p>
+        <p class="text">Match the correct colors, build your combo, increase your score, and challenge yourself to beat your best score.</p>
+        <p class="version">Version 1.0</p>
+      </div>
+      <button class="btn btn-ghost" id="btn-about-back" type="button">BACK</button>
+    </div>
+  </section>
+
+  <!-- ============ DEVELOPER ============ -->
+  <section id="screen-developer" class="screen scroll" aria-label="Developer">
+    <div class="center-col">
+      <h2 class="screen-title">About the Developer</h2>
+      <div class="card">
+        <h3 class="card-title">Muhammad Aliyan | BSCS Student, Virtual University</h3>
+        <p class="text">“I design and develop websites, Android apps &amp; games with a mix of my own logic and AI assistance.</p>
+        <p class="text">Always learning, always building.</p>
+        <p class="text">Your feedback helps me improve!”</p>
+      </div>
+      <button class="btn btn-ghost" id="btn-dev-back" type="button">BACK</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ DIALOG ============ -->
+<div class="backdrop" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-text">
+  <div class="dialog">
+    <h3 class="dialog-title" id="dialog-title">Title</h3>
+    <p class="dialog-text" id="dialog-text">Message</p>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" id="dialog-cancel" type="button">CANCEL</button>
+      <button class="btn btn-danger" id="dialog-confirm" type="button">CONFIRM</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     UTILITIES
+     ============================================================ */
+  const $ = function (id) { return document.getElementById(id); };
+
+  const Storage = {
+    available: (function () {
+      try {
+        const k = '__cs_probe__';
+        window.localStorage.setItem(k, '1');
+        window.localStorage.removeItem(k);
+        return true;
+      } catch (e) { return false; }
+    })(),
+    get: function (key, fallback) {
+      if (!this.available) return fallback;
+      try {
+        const raw = window.localStorage.getItem(key);
+        if (raw === null) return fallback;
+        return JSON.parse(raw);
+      } catch (e) { return fallback; }
+    },
+    set: function (key, value) {
+      if (!this.available) return;
+      try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
+    }
+  };
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  function shadeHex(hex, amt) {
+    let n;
+    try { n = parseInt(hex.slice(1), 16); } catch (e) { return hex; }
+    if (!isFinite(n)) return hex;
+    let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    if (amt < 0) {
+      const k = 1 + amt;
+      r = Math.round(r * k); g = Math.round(g * k); b = Math.round(b * k);
+    } else {
+      r = Math.round(r + (255 - r) * amt);
+      g = Math.round(g + (255 - g) * amt);
+      b = Math.round(b + (255 - b) * amt);
+    }
+    r = Math.max(0, Math.min(255, r));
+    g = Math.max(0, Math.min(255, g));
+    b = Math.max(0, Math.min(255, b));
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  /* ============================================================
+     SETTINGS / PERSISTENCE
+     ============================================================ */
+  const SETTINGS_KEY = 'cs_settings_v1';
+
+  const settings = {
+    best: 0,
+    music: true,
+    musicVol: 30,
+    sfx: true,
+    haptics: true,
+    difficulty: 'normal'
+  };
+
+  function loadSettings() {
+    const s = Storage.get(SETTINGS_KEY, null);
+    if (!s || typeof s !== 'object') return;
+    if (typeof s.best === 'number' && isFinite(s.best) && s.best >= 0) settings.best = Math.floor(s.best);
+    if (typeof s.music === 'boolean') settings.music = s.music;
+    if (typeof s.musicVol === 'number' && isFinite(s.musicVol)) {
+      settings.musicVol = Math.max(0, Math.min(100, Math.round(s.musicVol)));
+    }
+    if (typeof s.sfx === 'boolean') settings.sfx = s.sfx;
+    if (typeof s.haptics === 'boolean') settings.haptics = s.haptics;
+    if (s.difficulty === 'hard' || s.difficulty === 'normal') settings.difficulty = s.difficulty;
+  }
+
+  function saveSettings() {
+    Storage.set(SETTINGS_KEY, {
+      best: settings.best,
+      music: settings.music,
+      musicVol: settings.musicVol,
+      sfx: settings.sfx,
+      haptics: settings.haptics,
+      difficulty: settings.difficulty
+    });
+  }
+
+  /* ============================================================
+     AUDIO ENGINE  (Web Audio API — no external files)
+     ============================================================ */
+  const AudioEngine = {
+    ctx: null,
+    bgmGain: null,
+    sfxGain: null,
+    musicBuffer: null,
+    source: null,
+    ready: false,
+    failed: false,
+
+    init: function () {
+      if (this.ready || this.failed) return;
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) { this.failed = true; return; }
+        const ctx = new AC();
+        this.ctx = ctx;
+
+        this.bgmGain = ctx.createGain();
+        this.bgmGain.gain.value = settings.musicVol / 100;
+        this.bgmGain.connect(ctx.destination);
+
+        this.sfxGain = ctx.createGain();
+        this.sfxGain.gain.value = 0.9;
+        this.sfxGain.connect(ctx.destination);
+
+        this.musicBuffer = this._buildMusic(ctx);
+        this.ready = true;
+      } catch (e) {
+        this.failed = true;
+        this.ctx = null;
+      }
+    },
+
+    _buildMusic: function (ctx) {
+      const sr = ctx.sampleRate;
+      const dur = 4;
+      const len = Math.floor(sr * dur);
+      const buf = ctx.createBuffer(1, len, sr);
+      const d = buf.getChannelData(0);
+
+      const chords = [
+        { bass: 130.81, notes: [261.63, 329.63, 392.00, 523.25] }, // C
+        { bass: 110.00, notes: [220.00, 261.63, 329.63, 440.00] }, // Am
+        { bass: 87.31,  notes: [174.61, 220.00, 261.63, 349.23] }, // F
+        { bass: 98.00,  notes: [196.00, 246.94, 293.66, 392.00] }  // G
+      ];
+
+      for (let ci = 0; ci < chords.length; ci++) {
+        const t0 = ci * 1.0;
+        const ch = chords[ci];
+        for (let ni = 0; ni < 4; ni++) {
+          this._addNote(d, sr, t0 + ni * 0.25, 0.24, ch.notes[ni], 0.16, false);
+        }
+        this._addNote(d, sr, t0, 0.95, ch.bass, 0.22, true);
+      }
+
+      let peak = 0;
+      for (let i = 0; i < len; i++) {
+        const a = d[i] < 0 ? -d[i] : d[i];
+        if (a > peak) peak = a;
+      }
+      if (peak > 0.9) {
+        const k = 0.9 / peak;
+        for (let i = 0; i < len; i++) d[i] *= k;
+      }
+      return buf;
+    },
+
+    _addNote: function (d, sr, start, dur, freq, amp, isBass) {
+      const n = Math.floor(dur * sr);
+      const s0 = Math.floor(start * sr);
+      const w = 2 * Math.PI * freq / sr;
+      const decay = isBass ? 3.2 : 6.5;
+      const total = d.length;
+      for (let i = 0; i < n; i++) {
+        const t = i / sr;
+        const env = Math.min(1, t / 0.01) * Math.exp(-t * decay);
+        if (env < 0.0006) continue;
+        const ph = w * i;
+        const s = Math.sin(ph) + 0.32 * Math.sin(2 * ph) + 0.1 * Math.sin(3 * ph);
+        const idx = (s0 + i) % total;
+        d[idx] += s * env * amp;
+      }
+    },
+
+    playMusic: function () {
+      if (!this.ready || !this.ctx) return;
+      try {
+        if (this.ctx.state === 'suspended') {
+          const p = this.ctx.resume();
+          if (p && p.catch) p.catch(function () {});
+        }
+      } catch (e) { /* ignore */ }
+      if (this.source) return;
+      try {
+        const src = this.ctx.createBufferSource();
+        src.buffer = this.musicBuffer;
+        src.loop = true;
+        src.connect(this.bgmGain);
+        src.start(0);
+        this.source = src;
+      } catch (e) {
+        this.source = null;
+      }
+    },
+
+    stopMusic: function () {
+      const src = this.source;
+      this.source = null;
+      if (!src) return;
+      try { src.stop(); } catch (e) { /* ignore */ }
+      try { src.disconnect(); } catch (e) { /* ignore */ }
+    },
+
+    setVolume: function (v) {
+      if (!this.bgmGain || !this.ctx) return;
+      const g = Math.max(0, Math.min(1, v / 100));
+      try {
+        this.bgmGain.gain.setTargetAtTime(g, this.ctx.currentTime, 0.03);
+      } catch (e) {
+        try { this.bgmGain.gain.value = g; } catch (e2) { /* ignore */ }
+      }
+    },
+
+    tone: function (freq, dur, type, vol, delay, slideTo) {
+      if (!this.ready || !this.ctx || !settings.sfx) return;
+      try {
+        const ctx = this.ctx;
+        const t = ctx.currentTime + (delay || 0);
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = type || 'sine';
+        o.frequency.setValueAtTime(freq, t);
+        if (slideTo) {
+          try { o.frequency.exponentialRampToValueAtTime(Math.max(1, slideTo), t + dur); } catch (e) { /* ignore */ }
+        }
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol || 0.15, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g);
+        g.connect(this.sfxGain);
+        o.start(t);
+        o.stop(t + dur + 0.03);
+        o.onended = function () {
+          try { o.disconnect(); } catch (e) {}
+          try { g.disconnect(); } catch (e) {}
+        };
+      } catch (e) { /* ignore */ }
+    },
+
+    hide: function () {
+      try {
+        if (this.ctx && this.ctx.state === 'running') {
+          const p = this.ctx.suspend();
+          if (p && p.catch) p.catch(function () {});
+        }
+      } catch (e) { /* ignore */ }
+    },
+
+    show: function () {
+      try {
+        if (this.ctx && this.ctx.state === 'suspended' && settings.music) {
+          const p = this.ctx.resume();
+          if (p && p.catch) p.catch(function () {});
+        }
+      } catch (e) { /* ignore */ }
+    }
+  };
+
+  /* -------- Sound effects -------- */
+  const SFX = {
+    correct: function () {
+      AudioEngine.tone(700, 0.10, 'sine', 0.18, 0);
+      AudioEngine.tone(1050, 0.14, 'sine', 0.15, 0.07);
+    },
+    wrong: function () {
+      AudioEngine.tone(220, 0.30, 'sawtooth', 0.13, 0, 90);
+    },
+    combo: function () {
+      AudioEngine.tone(523, 0.09, 'triangle', 0.16, 0);
+      AudioEngine.tone(659, 0.09, 'triangle', 0.16, 0.08);
+      AudioEngine.tone(880, 0.16, 'triangle', 0.16, 0.16);
+    },
+    click: function () {
+      AudioEngine.tone(560, 0.05, 'square', 0.06, 0);
+    },
+    over: function () {
+      AudioEngine.tone(440, 0.18, 'triangle', 0.16, 0);
+      AudioEngine.tone(330, 0.18, 'triangle', 0.16, 0.17);
+      AudioEngine.tone(220, 0.42, 'triangle', 0.16, 0.34);
+    }
+  };
+
+  /* ============================================================
+     HAPTICS
+     ============================================================ */
+  const Haptics = {
+    supported: (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'),
+    buzz: function (pattern) {
+      if (!settings.haptics || !this.supported) return;
+      try { navigator.vibrate(pattern); } catch (e) { /* ignore */ }
+    }
+  };
+
+  /* ============================================================
+     GAME DATA
+     ============================================================ */
+  const COLORS = [
+    { id: 'red',    name: 'Red',    hex: '#E63946', fg: '#FFFFFF', symbol: '●' },
+    { id: 'yellow', name: 'Yellow', hex: '#FFB703', fg: '#22223B', symbol: '★' },
+    { id: 'blue',   name: 'Blue',   hex: '#3A86FF', fg: '#FFFFFF', symbol: '▲' },
+    { id: 'green',  name: 'Green',  hex: '#2EC4B6', fg: '#22223B', symbol: '■' },
+    { id: 'purple', name: 'Purple', hex: '#9D4EDD', fg: '#FFFFFF', symbol: '◆' }
+  ];
+
+  const MAX_STAGE = 10;
+
+  function comboMultiplier(c) {
+    if (c >= 10) return 5;
+    if (c >= 5) return 3;
+    if (c >= 2) return 2;
+    return 1;
+  }
+
+  function isMilestone(c) {
+    return c === 2 || c === 5 || (c >= 10 && c % 10 === 0);
+  }
+
+  function stageConfig(stage) {
+    let colors, ms, size, decoy = false;
+
+    if (stage <= 1)      { colors = 3; ms = 2800; size = 'lg'; }
+    else if (stage === 2){ colors = 4; ms = 2500; size = 'lg'; }
+    else if (stage === 3){ colors = 5; ms = 2250; size = 'md'; }
+    else if (stage === 4){ colors = 5; ms = 2020; size = 'md'; }
+    else if (stage === 5){ colors = 5; ms = 1780; size = 'md'; }
+    else {
+      colors = 5;
+      ms = 1780 - (stage - 5) * 130;
+      size = 'sm';
+      decoy = true;
+    }
+
+    if (settings.difficulty === 'hard') ms = Math.round(ms * 0.7);
+    ms = Math.max(700, ms);
+
+    return { colors: colors, ms: ms, size: size, decoy: decoy };
+  }
+
+  /* ============================================================
+     GAME STATE
+     ============================================================ */
+  const Game = {
+    status: 'idle',      // idle | playing | paused | over
+    score: 0,
+    lives: 3,
+    combo: 0,
+    highestCombo: 0,
+    stage: 1,
+    correct: 0,
+    total: 0,
+    target: null,
+    roundLocked: true,
+    timers: []
+  };
+
+  function later(fn, ms) {
+    const id = window.setTimeout(function () {
+      const i = Game.timers.indexOf(id);
+      if (i !== -1) Game.timers.splice(i, 1);
+      try { fn(); } catch (e) { /* never let a callback crash the loop */ }
+    }, ms);
+    Game.timers.push(id);
+    return id;
+  }
+
+  function clearGameTimers() {
+    for (let i = 0; i < Game.timers.length; i++) window.clearTimeout(Game.timers[i]);
+    Game.timers.length = 0;
+  }
+
+  /* ============================================================
+     DOM REFERENCES
+     ============================================================ */
+  const els = {};
+  const choicePool = [];
+  const lifeEls = [];
+
+  function cacheDom() {
+    els.screens = document.querySelectorAll('.screen');
+
+    els.hudScore = $('hud-score');
+    els.hudStage = $('hud-stage');
+    els.hudBest = $('hud-best');
+    els.hudCombo = $('hud-combo');
+    els.hudLives = $('hud-lives');
+
+    els.timerBar = $('timer-bar');
+    els.targetSwatch = $('target-swatch');
+    els.targetSymbol = $('target-symbol');
+    els.choices = $('choices');
+
+    els.goScore = $('go-score');
+    els.goBest = $('go-best');
+    els.goCombo = $('go-combo');
+    els.goAcc = $('go-acc');
+    els.goStage = $('go-stage');
+    els.goNew = $('go-new');
+
+    els.swMusic = $('sw-music');
+    els.swSfx = $('sw-sfx');
+    els.swHaptics = $('sw-haptics');
+    els.volRange = $('vol-range');
+    els.volVal = $('vol-val');
+    els.diffNormal = $('diff-normal');
+    els.diffHard = $('diff-hard');
+
+    els.dialog = $('dialog');
+    els.dialogTitle = $('dialog-title');
+    els.dialogText = $('dialog-text');
+    els.dialogConfirm = $('dialog-confirm');
+    els.dialogCancel = $('dialog-cancel');
+  }
+
+  /* ============================================================
+     SCREEN MANAGEMENT
+     ============================================================ */
+  let currentScreen = 'splash';
+
+  function showScreen(name) {
+    const target = $('screen-' + name);
+    if (!target) return;
+    if (currentScreen === name && target.classList.contains('active')) return;
+
+    for (let i = 0; i < els.screens.length; i++) {
+      els.screens[i].classList.remove('active');
+    }
+    target.classList.add('active');
+    currentScreen = name;
+
+    if (target.classList.contains('scroll')) target.scrollTop = 0;
+  }
+
+  /* ============================================================
+     HUD
+     ============================================================ */
+  function buildLives() {
+    els.hudLives.innerHTML = '';
+    lifeEls.length = 0;
+    for (let i = 0; i < 3; i++) {
+      const s = document.createElement('span');
+      s.className = 'life';
+      s.textContent = '❤';
+      els.hudLives.appendChild(s);
+      lifeEls.push(s);
+    }
+  }
+
+  function updateHUD() {
+    els.hudScore.textContent = String(Game.score);
+    els.hudStage.textContent = String(Game.stage);
+    els.hudBest.textContent = String(Math.max(settings.best, Game.score));
+    els.hudCombo.textContent = 'COMBO ×' + comboMultiplier(Game.combo);
+    for (let i = 0; i < 3; i++) {
+      lifeEls[i].classList.toggle('lost', i >= Game.lives);
+    }
+  }
+
+  function pulseCombo() {
+    els.hudCombo.classList.remove('milestone');
+    void els.hudCombo.offsetWidth;
+    els.hudCombo.classList.add('milestone');
+  }
+
+  /* ============================================================
+     CHOICE POOL
+     ============================================================ */
+  function ensurePool(n) {
+    while (choicePool.length < n) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'choice';
+      const s = document.createElement('span');
+      s.setAttribute('aria-hidden', 'true');
+      b.appendChild(s);
+      choicePool.push(b);
+    }
+  }
+
+  function resetChoices() {
+    for (let i = 0; i < choicePool.length; i++) {
+      choicePool[i].className = 'choice';
+    }
+  }
+
+  function renderChoices(items, size) {
+    ensurePool(items.length);
+
+    els.choices.className = 'choices size-' + size;
+
+    // Remove surplus buttons from the DOM
+    for (let i = items.length; i < choicePool.length; i++) {
+      const btn = choicePool[i];
+      if (btn.parentNode) btn.parentNode.removeChild(btn);
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      const btn = choicePool[i];
+      const item = items[i];
+
+      btn.className = 'choice';
+      btn.dataset.colorId = item.c.id;
+      btn.style.background = item.c.hex;
+      btn.style.color = item.c.fg;
+      btn.firstChild.textContent = item.c.symbol;
+      btn.setAttribute('aria-label', 'Color option ' + (i + 1) + ': ' + item.c.name);
+
+      els.choices.appendChild(btn);
+    }
+  }
+
+  function markChoice(btn, cls) {
+    if (!btn) return;
+    btn.classList.add(cls);
+  }
+
+  function findChoiceByColorId(id) {
+    const list = els.choices.querySelectorAll('.choice');
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].dataset.colorId === id) return list[i];
+    }
+    return null;
+  }
+
+  /* ============================================================
+     TIMER BAR
+     ============================================================ */
+  function startRoundTimer(ms) {
+    const bar = els.timerBar;
+    bar.style.transition = 'none';
+    bar.style.width = '100%';
+    bar.style.backgroundColor = '#2EC4B6';
+    void bar.offsetWidth;
+    bar.style.transition = 'width ' + ms + 'ms linear, background-color ' + ms + 'ms linear';
+    bar.style.width = '0%';
+    bar.style.backgroundColor = '#E63946';
+
+    later(function () { timeUp(); }, ms);
+  }
+
+  function freezeTimerBar() {
+    const bar = els.timerBar;
+    try {
+      const w = bar.getBoundingClientRect().width;
+      const parent = bar.parentElement ? bar.parentElement.getBoundingClientRect().width : 0;
+      bar.style.transition = 'none';
+      bar.style.width = (parent > 0 ? (w / parent) * 100 : 0) + '%';
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ============================================================
+     CORE GAME FLOW
+     ============================================================ */
+  function startGame() {
+    clearGameTimers();
+
+    Game.status = 'playing';
+    Game.score = 0;
+    Game.lives = 3;
+    Game.combo = 0;
+    Game.highestCombo = 0;
+    Game.stage = 1;
+    Game.correct = 0;
+    Game.total = 0;
+    Game.target = null;
+    Game.roundLocked = true;
+
+    resetChoices();
+    updateHUD();
+    showScreen('game');
+
+    if (settings.music) {
+      AudioEngine.init();
+      AudioEngine.playMusic();
+    }
+
+    nextRound();
+  }
+
+  function nextRound() {
+    if (Game.status !== 'playing') return;
+
+    Game.roundLocked = false;
+    Game.stage = Math.min(MAX_STAGE, 1 + Math.floor(Game.correct / 5));
+
+    const cfg = stageConfig(Game.stage);
+
+    // Pick the colour pool
+    const pool = shuffle(COLORS.slice()).slice(0, cfg.colors);
+    const target = pool[Math.floor(Math.random() * pool.length)];
+    Game.target = target;
+
+    // Build choice list
+    const choices = [];
+    for (let i = 0; i < pool.length; i++) choices.push({ c: pool[i], decoy: false });
+
+    if (cfg.decoy) {
+      const wrongs = [];
+      for (let i = 0; i < pool.length; i++) {
+        if (pool[i].id !== target.id) wrongs.push(pool[i]);
+      }
+      if (wrongs.length) {
+        const w = wrongs[Math.floor(Math.random() * wrongs.length)];
+        choices.push({
+          c: {
+            id: w.id,
+            name: w.name,
+            hex: shadeHex(w.hex, -0.20),
+            fg: w.fg,
+            symbol: w.symbol
+          },
+          decoy: true
+        });
+      }
+    }
+
+    shuffle(choices);
+
+    // Render
+    els.targetSwatch.style.background = target.hex;
+    els.targetSwatch.style.color = target.fg;
+    els.targetSymbol.textContent = target.symbol;
+    els.targetSwatch.setAttribute('aria-label', 'Target color: ' + target.name);
+
+    renderChoices(choices, cfg.size);
+    updateHUD();
+
+    startRoundTimer(cfg.ms);
+  }
+
+  function answer(colorId, btnEl) {
+    if (Game.status !== 'playing' || Game.roundLocked) return;
+    Game.roundLocked = true;
+
+    clearGameTimers();
+    freezeTimerBar();
+
+    Game.total++;
+    const isCorrect = !!(Game.target && colorId === Game.target.id);
+
+    if (isCorrect) {
+      Game.correct++;
+      Game.combo++;
+      if (Game.combo > Game.highestCombo) Game.highestCombo = Game.combo;
+
+      const mult = comboMultiplier(Game.combo);
+      Game.score += 10 * mult;
+
+      SFX.correct();
+      Haptics.buzz(12);
+      markChoice(btnEl, 'correct');
+
+      if (isMilestone(Game.combo)) {
+        SFX.combo();
+        Haptics.buzz([12, 40, 12]);
+        pulseCombo();
+      }
+
+      updateHUD();
+      later(nextRound, 300);
+    } else {
+      Game.combo = 0;
+      Game.lives--;
+
+      SFX.wrong();
+      Haptics.buzz([35, 45, 35]);
+      markChoice(btnEl, 'wrong');
+      if (Game.target) markChoice(findChoiceByColorId(Game.target.id), 'reveal');
+
+      updateHUD();
+
+      if (Game.lives <= 0) later(endGame, 520);
+      else later(nextRound, 540);
+    }
+  }
+
+  function timeUp() {
+    if (Game.status !== 'playing' || Game.roundLocked) return;
+    Game.roundLocked = true;
+
+    clearGameTimers();
+    freezeTimerBar();
+
+    Game.total++;
+    Game.combo = 0;
+    Game.lives--;
+
+    SFX.wrong();
+    Haptics.buzz([35, 45, 35]);
+    if (Game.target) markChoice(findChoiceByColorId(Game.target.id), 'reveal');
+
+    updateHUD();
+
+    if (Game.lives <= 0) later(endGame, 520);
+    else later(nextRound, 540);
+  }
+
+  function endGame() {
+    if (Game.status === 'over') return;
+    Game.status = 'over';
+
+    clearGameTimers();
+    resetChoices();
+
+    const isRecord = Game.score > settings.best;
+    if (isRecord) {
+      settings.best = Game.score;
+      saveSettings();
+    }
+
+    const acc = Game.total > 0 ? Math.round((Game.correct / Game.total) * 100) : 0;
+
+    els.goScore.textContent = String(Game.score);
+    els.goBest.textContent = String(settings.best);
+    els.goCombo.textContent = '×' + comboMultiplier(Game.highestCombo);
+    els.goAcc.textContent = acc + '%';
+    els.goStage.textContent = String(Game.stage);
+    els.goNew.style.display = isRecord ? '' : 'none';
+
+    SFX.over();
+    Haptics.buzz([60, 60, 60, 60, 140]);
+
+    showScreen('gameover');
+  }
+
+  function quitToMenu() {
+    Game.status = 'idle';
+    clearGameTimers();
+    resetChoices();
+    showScreen('menu');
+  }
+
+  function pauseGame() {
+    if (Game.status !== 'playing') return;
+    Game.status = 'paused';
+    clearGameTimers();
+    freezeTimerBar();
+  }
+
+  function resumeGame() {
+    if (Game.status !== 'paused') return;
+    Game.status = 'playing';
+    if (Game.lives <= 0) { endGame(); return; }
+    nextRound();
+  }
+
+  /* ============================================================
+     DIALOG
+     ============================================================ */
+  let dialogAction = null;
+
+  function openDialog(title, text, confirmLabel, onConfirm) {
+    els.dialogTitle.textContent = title;
+    els.dialogText.textContent = text;
+    els.dialogConfirm.textContent = confirmLabel;
+    dialogAction = typeof onConfirm === 'function' ? onConfirm : null;
+    els.dialog.classList.add('show');
+    try { els.dialogConfirm.focus(); } catch (e) { /* ignore */ }
+  }
+
+  function closeDialog() {
+    els.dialog.classList.remove('show');
+    dialogAction = null;
+  }
+
+  /* ============================================================
+     TAP BINDING (with duplicate-tap protection)
+     ============================================================ */
+  function bindTap(el, handler) {
+    if (!el) return;
+    let last = 0;
+    el.addEventListener('click', function (e) {
+      const now = Date.now();
+      if (now - last < 300) return;
+      last = now;
+      try { handler(e); } catch (err) { /* never crash on a tap */ }
+    });
+  }
+
+  /* ============================================================
+     SETTINGS UI
+     ============================================================ */
+  function syncSettingsUI() {
+    els.swMusic.setAttribute('aria-checked', settings.music ? 'true' : 'false');
+    els.swMusic.textContent = settings.music ? 'ON' : 'OFF';
+
+    els.swSfx.setAttribute('aria-checked', settings.sfx ? 'true' : 'false');
+    els.swSfx.textContent = settings.sfx ? 'ON' : 'OFF';
+
+    els.swHaptics.setAttribute('aria-checked', settings.haptics ? 'true' : 'false');
+    els.swHaptics.textContent = settings.haptics ? 'ON' : 'OFF';
+    els.swHaptics.disabled = false;
+
+    els.volRange.value = String(settings.musicVol);
+    els.volVal.textContent = settings.musicVol + '%';
+
+    els.diffNormal.classList.toggle('active', settings.difficulty === 'normal');
+    els.diffHard.classList.toggle('active', settings.difficulty === 'hard');
+  }
+
+  function setDifficulty(d) {
+    if (settings.difficulty === d) return;
+    settings.difficulty = d;
+    saveSettings();
+    syncSettingsUI();
+    SFX.click();
+    Haptics.buzz(8);
+  }
+
+  /* ============================================================
+     EVENT WIRING
+     ============================================================ */
+  function bindEvents() {
+    /* ---- Navigation ---- */
+    bindTap($('btn-play'), function () {
+      SFX.click(); Haptics.buzz(8);
+      startGame();
+    });
+
+    bindTap($('btn-settings'), function () {
+      SFX.click(); Haptics.buzz(8);
+      syncSettingsUI();
+      showScreen('settings');
+    });
+
+    bindTap($('btn-about'), function () {
+      SFX.click(); Haptics.buzz(8);
+      showScreen('about');
+    });
+
+    bindTap($('btn-developer'), function () {
+      SFX.click(); Haptics.buzz(8);
+      showScreen('developer');
+    });
+
+    bindTap($('btn-settings-back'), function () {
+      SFX.click(); Haptics.buzz(8);
+      showScreen('menu');
+    });
+
+    bindTap($('btn-about-back'), function () {
+      SFX.click(); Haptics.buzz(8);
+      showScreen('menu');
+    });
+
+    bindTap($('btn-dev-back'), function () {
+      SFX.click(); Haptics.buzz(8);
+      showScreen('menu');
+    });
+
+    /* ---- Game over ---- */
+    bindTap($('btn-again'), function () {
+      SFX.click(); Haptics.buzz(8);
+      startGame();
+    });
+
+    bindTap($('btn-home'), function () {
+      SFX.click(); Haptics.buzz(8);
+      quitToMenu();
+    });
+
+    /* ---- Quit (with confirmation) ---- */
+    bindTap($('btn-quit'), function () {
+      SFX.click(); Haptics.buzz(8);
+      if (Game.status !== 'playing' && Game.status !== 'paused') {
+        quitToMenu();
+        return;
+      }
+      openDialog(
+        'Quit Game',
+        'Are you sure you want to quit? Your current progress will be lost.',
+        'QUIT',
+        function () { quitToMenu(); }
+      );
+    });
+
+    /* ---- Choices (delegated, pointerdown for snappy response) ---- */
+    els.choices.addEventListener('pointerdown', function (e) {
+      const btn = e.target && e.target.closest ? e.target.closest('.choice') : null;
+      if (!btn || !els.choices.contains(btn)) return;
+      answer(btn.dataset.colorId, btn);
+    });
+
+    /* ---- Settings toggles ---- */
+    bindTap(els.swMusic, function () {
+      settings.music = !settings.music;
+      saveSettings();
+      syncSettingsUI();
+      SFX.click(); Haptics.buzz(8);
+
+      if (settings.music) {
+        AudioEngine.init();
+        AudioEngine.setVolume(settings.musicVol);
+        AudioEngine.playMusic();
+      } else {
+        AudioEngine.stopMusic();
+      }
+    });
+
+    bindTap(els.swSfx, function () {
+      settings.sfx = !settings.sfx;
+      saveSettings();
+      syncSettingsUI();
+      if (settings.sfx) { SFX.click(); Haptics.buzz(8); }
+    });
+
+    bindTap(els.swHaptics, function () {
+      settings.haptics = !settings.haptics;
+      saveSettings();
+      syncSettingsUI();
+      Haptics.buzz(10);
+      SFX.click();
+    });
+
+    els.volRange.addEventListener('input', function () {
+      const v = parseInt(els.volRange.value, 10);
+      settings.musicVol = isFinite(v) ? Math.max(0, Math.min(100, v)) : 30;
+      els.volVal.textContent = settings.musicVol + '%';
+      AudioEngine.setVolume(settings.musicVol);
+    });
+
+    els.volRange.addEventListener('change', function () {
+      saveSettings();
+      Haptics.buzz(6);
+    });
+
+    bindTap(els.diffNormal, function () { setDifficulty('normal'); });
+    bindTap(els.diffHard, function () { setDifficulty('hard'); });
+
+    /* ---- Reset best score ---- */
+    bindTap($('btn-reset'), function () {
+      SFX.click(); Haptics.buzz(8);
+      openDialog(
+        'Reset Best Score',
+        'Are you sure you want to reset your best score?',
+        'RESET',
+        function () {
+          settings.best = 0;
+          saveSettings();
+          updateHUD();
+          els.goBest.textContent = '0';
+          SFX.click();
+          Haptics.buzz([15, 30, 15]);
+        }
+      );
+    });
+
+    /* ---- Dialog buttons ---- */
+    bindTap(els.dialogCancel, function () {
+      SFX.click();
+      closeDialog();
+    });
+
+    bindTap(els.dialogConfirm, function () {
+      const action = dialogAction;
+      closeDialog();
+      if (action) {
+        try { action(); } catch (e) { /* ignore */ }
+      }
+    });
+
+    /* ---- Combo animation cleanup ---- */
+    els.hudCombo.addEventListener('animationend', function () {
+      els.hudCombo.classList.remove('milestone');
+    });
+
+    /* ---- Keyboard ---- */
+    document.addEventListener('keydown', function (e) {
+      if (els.dialog.classList.contains('show')) {
+        if (e.key === 'Escape') { e.preventDefault(); closeDialog(); }
+        return;
+      }
+
+      if (currentScreen === 'game' && Game.status === 'playing') {
+        const n = parseInt(e.key, 10);
+        if (!isNaN(n) && n >= 1 && n <= 6) {
+          const btns = els.choices.querySelectorAll('.choice');
+          if (btns[n - 1]) {
+            e.preventDefault();
+            answer(btns[n - 1].dataset.colorId, btns[n - 1]);
+          }
+          return;
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          if (Game.status === 'playing') {
+            openDialog(
+              'Quit Game',
+              'Are you sure you want to quit? Your current progress will be lost.',
+              'QUIT',
+              function () { quitToMenu(); }
+            );
+          }
+        }
+      }
+    });
+
+    /* ---- First user interaction → unlock audio ---- */
+    function firstInteraction() {
+      document.removeEventListener('pointerdown', firstInteraction, true);
+      document.removeEventListener('keydown', firstInteraction, true);
+      AudioEngine.init();
+      if (settings.music && AudioEngine.ready) {
+        AudioEngine.setVolume(settings.musicVol);
+        AudioEngine.playMusic();
+      }
+    }
+    document.addEventListener('pointerdown', firstInteraction, true);
+    document.addEventListener('keydown', firstInteraction, true);
+
+    /* ---- Visibility handling ---- */
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        AudioEngine.hide();
+        if (Game.status === 'playing') pauseGame();
+      } else {
+        AudioEngine.show();
+        if (Game.status === 'paused') resumeGame();
+      }
+    });
+
+    /* ---- Page unload safety ---- */
+    window.addEventListener('pagehide', function () {
+      AudioEngine.stopMusic();
+    });
+  }
+
+  /* ============================================================
+     BOOT
+     ============================================================ */
+  function init() {
+    cacheDom();
+    loadSettings();
+    buildLives();
+    syncSettingsUI();
+    bindEvents();
+    updateHUD();
+
+    showScreen('splash');
+
+    // Splash lasts exactly 2 seconds.
+    window.setTimeout(function () {
+      if (currentScreen === 'splash') showScreen('menu');
+    }, 2000);
+
+    // Safety net — never leave the user stuck on the splash.
+    window.setTimeout(function () {
+      if (currentScreen === 'splash') showScreen('menu');
+    }, 2600);
+  }
+
+  function emergencyBoot() {
+    try {
+      const splash = $('screen-splash');
+      const menu = $('screen-menu');
+      if (splash) splash.classList.remove('active');
+      if (menu) menu.classList.add('active');
+    } catch (e) { /* nothing more we can do */ }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      try { init(); } catch (e) { emergencyBoot(); }
+    });
+  } else {
+    try { init(); } catch (e) { emergencyBoot(); }
+  }
+
+  // Last-resort safety: if anything goes wrong before the menu shows.
+  window.setTimeout(function () {
+    if (currentScreen === 'splash') {
+      try { showScreen('menu'); } catch (e) { emergencyBoot(); }
+    }
+  }, 3000);
+
+})();
+</script>
+</body>
+</html>
